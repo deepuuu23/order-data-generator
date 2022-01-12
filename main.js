@@ -1,95 +1,123 @@
-//import randomItem from 'random-item';
-const jsonfile = require('jsonfile')
-const randomExt = require('random-ext');
+const jsonfile = require("jsonfile");
+const randomExt = require("random-ext");
 
-var finalDataSet = {"data" : []};
+var finalDataSet = { data: [] };
 var dataSetSize = 10;
-var noOfOrders = 4;
-var maxOrderSize = 10;
 var orderIdBegin = 1234;
 
 var products = [];
-products = [{
-	"productId" : "random generated string",
-	"productName" : "IPhone 13 Pro",
-	"price" : 10000
-},
-{
-	"productId" : "random generated string",
-	"productName" : "Samsung S20 FE",
-	"price" : 8500
-},
-{
-	"productId" : "random generated string",
-	"productName" : "Vivo V11 Pro",
-	"price" : 4000
-},
-{
-	"productId" : "Samsung M21",
-	"productName" : "Samsung M21",
-	"price" : 2000
-},
-{
-	"productId" : "random generated string",
-	"productName" : "RealMe 5A",
-	"price" : 1000
-},
-{
-	"productId" : "random generated string",
-	"productName" : "Blackberry Z Ultra",
-	"price" : 11000
-},
-{
-	"productId" : "random generated string",
-	"productName" : "IPhone 12 Pro",
-	"price" : 9000
-},
-{
-	"productId" : "random generated string",
-	"productName" : "IPhone 13",
-	"price" : 9500
-},
-{
-	"productId" : "random generated string",
-	"productName" : "IPhone 12",
-	"price" : 8500
-}];
+products = [
+  {
+    productId: "random generated string",
+    productName: "IPhone 13 Pro",
+    unitPrice: 10000,
+  },
+  {
+    productId: "random generated string",
+    productName: "Samsung S20 FE",
+    unitPrice: 8500,
+  },
+  {
+    productId: "random generated string",
+    productName: "Vivo V11 Pro",
+    unitPrice: 4000,
+  },
+  {
+    productId: "Samsung M21",
+    productName: "Samsung M21",
+    unitPrice: 2000,
+  },
+  {
+    productId: "random generated string",
+    productName: "RealMe 5A",
+    unitPrice: 1000,
+  },
+  {
+    productId: "random generated string",
+    productName: "Blackberry Z Ultra",
+    unitPrice: 11000,
+  },
+  {
+    productId: "random generated string",
+    productName: "IPhone 12 Pro",
+    unitPrice: 9000,
+  },
+  {
+    productId: "random generated string",
+    productName: "IPhone 13",
+    unitPrice: 9500,
+  },
+  {
+    productId: "random generated string",
+    productName: "IPhone 12",
+    unitPrice: 8500,
+  },
+];
 
-var sampleObject = {
-    "id" : 1,
-    "orderId" : "ORD1234",
-	"orderDate" : new Date(),
-    "productId" : "23",
-    "productName" : "",
-	"quantity" : 12,    
-    "productPrice" : 1500,
-	"totalOrderAmount" : 21342
-}
+const file =
+  "C:/Users/p.kumar.garamidde/Accenture/Projects/DANTE/PoC/testing_automation/src/data.json";
 
-const file = 'C:/Users/p.kumar.garamidde/Accenture/Projects/DANTE/PoC/testing_automation/src/data.json'
-
-for(i=0; i<dataSetSize; i++) {
-    
-    sampleObject.id = i+1;
-    sampleObject.orderId = "ORD"+(orderIdBegin++);
-    sampleObject.orderDate = randomExt.date(new Date());
-
-    var product = getRandomProduct();
-
-    sampleObject.productId = randomExt.string(6,6);
-    sampleObject.productName = product.productName;
-    sampleObject.productPrice = product.productPrice;
-    sampleObject.quantity = randomExt.integer(10, 1);
-
-    finalDataSet.data.push(JSON.parse(JSON.stringify(sampleObject)));
-}
+finalDataSet = createDataSet();
 
 jsonfile.writeFile(file, finalDataSet, function (err) {
-  if (err) console.error(err)
-})
+  if (err) console.error(err);
+});
 
-console.log("Done!")
+console.log("Done!");
 
 function getRandomProduct() {
-    return randomExt.pick(products);
+  return randomExt.pick(products);
+}
+
+function createDataSet() {
+  var orders = [];
+  var transaction = {};
+  var orderCount = 0,
+    transactionCount = 0;
+
+  orders = createOrders(dataSetSize, orderIdBegin);
+
+  for (i = 0; i < orders.length; i++) {
+    for (j = 0; j < orders[i].products.length; j++) {
+      transaction.id = transactionCount++;
+      transaction.orderId = orders[i].orderId;
+      transaction.orderDate = orders[i].orderDate;
+      transaction.totalOrderAmount = orders[i].orderAmount;
+      transaction.productId = orders[i].products[j].productId;
+      transaction.productName = orders[i].products[j].productName;
+      transaction.productPrice = orders[i].products[j].productPrice;
+      transaction.quantity = orders[i].products[j].quantity;
+      finalDataSet.data.push(JSON.parse(JSON.stringify(transaction)));
+    }
+  }
+
+  return finalDataSet;
+}
+
+function createOrders(count, idBeginsWith) {
+  var orders = [];
+  for (i = 0; i < count; i++) {
+    orders.push(createOrder(idBeginsWith++));
+  }
+  return orders;
+}
+
+function createOrder(orderNo) {
+  var order = {};
+  order.orderAmount = 0;
+
+  order.products = randomExt.subArray(
+    products,
+    randomExt.integer(products.length, 1)
+  );
+  order.orderId = "ORD" + orderNo;
+  order.orderDate = randomExt.date(new Date(), new Date(2015, 01, 01));
+  for (i = 0; i < order.products.length; i++) {
+    order.products[i].productId = randomExt.string(6, 6);
+    order.products[i].quantity = randomExt.integer(10, 1);
+    order.products[i].productPrice =
+      order.products[i].quantity * order.products[i].unitPrice;
+    order.orderAmount += order.products[i].productPrice;
+  }
+  return order;
 }
