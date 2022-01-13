@@ -2,11 +2,10 @@ const jsonfile = require("jsonfile");
 const randomExt = require("random-ext");
 
 var finalDataSet = { data: [] };
-var dataSetSize = 10;
+var dataSetSize = 30;
 var orderIdBegin = 1234;
 
-var products = [];
-products = [
+var products = [
   {
     productId: "random generated string",
     productName: "IPhone 13 Pro",
@@ -59,7 +58,7 @@ const file =
 
 finalDataSet = createDataSet();
 
-jsonfile.writeFile(file, finalDataSet, function (err) {
+jsonfile.writeFile(file, finalDataSet.data, function (err) {
   if (err) console.error(err);
 });
 
@@ -72,10 +71,11 @@ function getRandomProduct() {
 function createDataSet() {
   var orders = [];
   var transaction = {};
-  var orderCount = 0,
-    transactionCount = 0;
+  var transactionCount = 0;
 
   orders = createOrders(dataSetSize, orderIdBegin);
+
+  console.log("No of orders generated: "+orders.length);
 
   for (i = 0; i < orders.length; i++) {
     for (j = 0; j < orders[i].products.length; j++) {
@@ -95,24 +95,29 @@ function createDataSet() {
 }
 
 function createOrders(count, idBeginsWith) {
-  var orders = [];
-  for (i = 0; i < count; i++) {
-    orders.push(createOrder(idBeginsWith++));
+  let orders = [];
+  console.log("Create orders method received count: "+count)
+  for (let k = 0; k < count; k++) {
+    let order = {};
+    order = createOrder(idBeginsWith++);
+    orders.push(order);
   }
+  console.log("Order array created: "+ orders.length);
   return orders;
 }
 
 function createOrder(orderNo) {
-  var order = {};
+  let order = {};
   order.orderAmount = 0;
 
   order.products = randomExt.subArray(
     products,
     randomExt.integer(products.length, 1)
   );
+
   order.orderId = "ORD" + orderNo;
   order.orderDate = randomExt.date(new Date(), new Date(2015, 01, 01));
-  for (i = 0; i < order.products.length; i++) {
+  for (let i = 0; i < order.products.length; i++) {
     order.products[i].productId = randomExt.string(6, 6);
     order.products[i].quantity = randomExt.integer(10, 1);
     order.products[i].productPrice =
